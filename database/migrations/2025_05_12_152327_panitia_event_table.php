@@ -10,13 +10,11 @@ class PanitiaEventTable extends Migration
     {
         Schema::create('panitia_event', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_events');
             $table->string('nama');
             $table->string('nomor_hp');
             $table->string('email');
+            $table->string('password', 255);
             $table->timestamps();
-
-            $table->foreign('id_events')->references('id_events')->on('events')->onDelete('cascade');
         });
     }
 

@@ -3,7 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\KeuanganController;
+use App\Http\Controllers\Admin\PanitiaController;
+use App\Http\Controllers\Keuangan\DashboardKeuanganController;
+use App\Http\Controllers\Panitia\DashboardPanitiaController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\KeuanganMiddleware;
+use App\Http\Middleware\PanitiaMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])->name('admin.')->group(function () {
@@ -27,16 +32,30 @@ Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])
         Route::put('/{keuangans}', [KeuanganController::class, 'update'])->name('update');
         Route::delete('/{keuangans}', [KeuanganController::class, 'destroy'])->name('destroy');
     });
+     //CRUD Panitia Event
+    Route::prefix('TPanitia')->name('panitias.')->group(function () {
+        Route::get('/dashboard', [PanitiaController::class, 'dashboard'])->name('dashboard');
+        Route::get('/create', [PanitiaController::class, 'create'])->name('create');
+        Route::post('/', [PanitiaController::class, 'store'])->name('store');
+        Route::get('/{panitias}/edit', [PanitiaController::class, 'edit'])->name('edit');
+        Route::put('/{panitias}', [PanitiaController::class, 'update'])->name('update');
+        Route::delete('/{panitias}', [PanitiaController::class, 'destroy'])->name('destroy');
+    });
     
 });
 
-
-Route::get('/force-logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/login');
+//Login sebagai Tim Keuangan
+Route::prefix('keuangan')->middleware(['auth', 'verified', KeuanganMiddleware::class])->name('keuangan.')->group(function () {
+    Route::get('/dashboard', [DashboardKeuanganController::class, 'index'])->name('dashboard');
 });
+
+//Login sebagai Panitia Event
+Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::class])->name('panitia.')->group(function () {
+    Route::get('/dashboard', [DashboardPanitiaController::class, 'index'])->name('dashboard');
+});
+
+
+
 
 
 Route::get('/', function () {
@@ -47,6 +66,12 @@ Route::get('/home', function () {
     return view('index');
 });
 
+Route::get('/force-logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
+});
 
 
 

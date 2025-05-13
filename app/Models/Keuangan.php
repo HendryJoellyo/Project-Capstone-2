@@ -10,7 +10,7 @@ class Keuangan extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id_events', 'nama', 'nomor_hp', 'email'
+        'id_events', 'nama', 'nomor_hp', 'email', 'password'
     ];
 
     public function event()

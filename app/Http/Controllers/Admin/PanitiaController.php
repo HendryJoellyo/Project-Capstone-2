@@ -5,21 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
-use App\Models\Keuangan;
+
+use App\Models\PanitiaEvent;
 use App\Models\User;
 
 
-class KeuanganController extends Controller
+class PanitiaController extends Controller
 {
     public function dashboard()
     {
-        $keuangans = Keuangan::all();
-        return view('admin.TKeuangan.dashboard', compact('keuangans'));
+        $panitias = PanitiaEvent::all();
+        return view('admin.TPanitia.dashboard', compact('panitias'));
     }
 
     public function create()
     {
-        return view('admin.TKeuangan.create');
+        return view('admin.TPanitia.create');
     }
 
     public function store(Request $request)
@@ -27,15 +28,14 @@ class KeuanganController extends Controller
     $request->validate([
         'nama'      => 'required|string|max:100',
         'nomor_hp'  => 'required|string|max:20',
-        'email'     => 'required|email|max:100|unique:users,email|unique:tim_keuangan,email',
+        'email'     => 'required|email|max:100|unique:users,email|unique:panitia_event,email',
         'password'  => 'required|string|max:100',
     ]);
 
     // hash password
     $hashedPassword = Hash::make($request->password);
 
-    // simpan ke tabel tim_keuangan
-    Keuangan::create([
+    PanitiaEvent::create([
         'nama'      => $request->nama,
         'nomor_hp'  => $request->nomor_hp,
         'email'     => $request->email,
@@ -47,17 +47,17 @@ class KeuanganController extends Controller
         'nama'      => $request->nama,
         'email'     => $request->email,
         'password'  => $hashedPassword,
-        'id_roles'  => 2, // Panitia_Keuangan
+        'id_roles'  => 3,
     ]);
 
-    return redirect()->route('admin.keuangans.dashboard')->with('success', 'Data berhasil ditambahkan.');
+    return redirect()->route('admin.panitias.dashboard')->with('success', 'Data berhasil ditambahkan.');
 }
 
 
     public function edit($id)
     {
-        $keuangan = Keuangan::findOrFail($id);
-        return view('admin.TKeuangan.edit', compact('keuangan'));
+        $panitia = PanitiaEvent::findOrFail($id);
+        return view('admin.TPanitia.edit', compact('panitia'));
     }
 
     public function update(Request $request, $id)
@@ -69,7 +69,7 @@ class KeuanganController extends Controller
         'password'  => 'nullable|string|max:100',
     ]);
 
-    $keuangan = Keuangan::findOrFail($id);
+    $panitia = PanitiaEvent::findOrFail($id);
 
     $data = [
         'nama'      => $request->nama,
@@ -81,11 +81,11 @@ class KeuanganController extends Controller
         $data['password'] = Hash::make($request->password);
     }
 
-    // update keuangan
-    $keuangan->update($data);
+    // update panitia
+    $panitia->update($data);
 
     // cari user dengan email lama
-    $user = User::where('email', $keuangan->email)->first();
+    $user = User::where('email', $panitia->email)->first();
 
     if ($user) {
         $userData = [
@@ -100,26 +100,25 @@ class KeuanganController extends Controller
         $user->update($userData);
     }
 
-    return redirect()->route('admin.keuangans.dashboard')->with('success', 'Data berhasil diperbarui.');
+    return redirect()->route('admin.panitias.dashboard')->with('success', 'Data berhasil diperbarui.');
 }
 
 
     public function destroy($id)
 {
-    $keuangan = Keuangan::findOrFail($id);
+    $panitia = PanitiaEvent::findOrFail($id);
 
     // cari user berdasarkan email
-    $user = User::where('email', $keuangan->email)->first();
+    $user = User::where('email', $panitia->email)->first();
 
-    // hapus keuangan
-    $keuangan->delete();
+    $panitia->delete();
 
     // hapus user kalau ada
     if ($user) {
         $user->delete();
     }
 
-    return redirect()->route('admin.keuangans.dashboard')->with('success', 'Data berhasil dihapus.');
+    return redirect()->route('admin.panitias.dashboard')->with('success', 'Data berhasil dihapus.');
 }
 
 }

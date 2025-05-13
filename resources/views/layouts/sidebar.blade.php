@@ -28,6 +28,9 @@
             <a href="{{ route('admin.keuangans.dashboard') }}" class="nav-link {{ request()->routeIs('admin.keuangans.dashboard') ? 'active' : '' }}">
                 <p>Data Tim Keuangan</p>
             </a>
+            <a href="{{ route('admin.panitias.dashboard') }}" class="nav-link {{ request()->routeIs('admin.panitias.dashboard') ? 'active' : '' }}">
+                <p>Data Panitia Event</p>
+            </a>
         </li>
         </ul>
       </nav>

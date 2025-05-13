@@ -13,6 +13,7 @@ class TimKeuanganTable extends Migration
             $table->string('nama');
             $table->string('nomor_hp');
             $table->string('email');
+            $table->string('password', 255);
             $table->timestamps();
         });
     }
