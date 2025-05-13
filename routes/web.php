@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\KeuanganController;
 use App\Http\Controllers\Admin\PanitiaController;
 use App\Http\Controllers\Keuangan\DashboardKeuanganController;
 use App\Http\Controllers\Panitia\DashboardPanitiaController;
+use App\Http\Controllers\Panitia\EventController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KeuanganMiddleware;
 use App\Http\Middleware\PanitiaMiddleware;
@@ -52,7 +53,13 @@ Route::prefix('keuangan')->middleware(['auth', 'verified', KeuanganMiddleware::c
 //Login sebagai Panitia Event
 Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::class])->name('panitia.')->group(function () {
     Route::get('/dashboard', [DashboardPanitiaController::class, 'index'])->name('dashboard');
+    
+    // Route event
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
 });
+
 
 
 
