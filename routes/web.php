@@ -58,13 +58,14 @@ Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::cla
 
 
 
-Route::get('/', function () {
-    return redirect('/home');
-});
-
+// Login sebagai Member
 Route::get('/home', function () {
     return view('index');
-});
+})->name('index');
+
+
+
+
 
 Route::get('/force-logout', function () {
     Auth::logout();
@@ -75,6 +76,9 @@ Route::get('/force-logout', function () {
 
 
 
+Route::get('/', function () {
+    return redirect('/home');
+});
 
 
 

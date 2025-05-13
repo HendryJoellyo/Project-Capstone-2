@@ -22,7 +22,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-        public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): RedirectResponse
 {
     $request->authenticate();
     $request->session()->regenerate();
@@ -35,12 +35,16 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('keuangan.dashboard');
     } elseif ($user->role && $user->role->nama_role === 'Panitia_Event') {
         return redirect()->route('panitia.dashboard');
+    } elseif ($user->role && $user->role->nama_role === 'Member') {
+        return redirect()->route('index');
     }
 
 
 
     abort(403, 'Unauthorized.');
 }
+
+
     
     /**
      * Destroy an authenticated session.
