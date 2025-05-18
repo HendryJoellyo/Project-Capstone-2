@@ -9,11 +9,16 @@ class Event extends Model
     protected $table = 'events';
     protected $primaryKey = 'id_events';
 
+     protected $casts = [
+    'tanggal' => 'date',
+    ];
+
     protected $fillable = [
         'nama_event', 'tanggal', 'waktu', 'lokasi', 'narasumber',
         'poster', 'biaya_registrasi', 'jumlah_peserta',
         'created_at', 'updated_at'
     ];
+    
 
     public function eventRegistrations()
     {

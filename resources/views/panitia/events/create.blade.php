@@ -38,8 +38,12 @@
             <input type="date" name="tanggal" class="form-control" required>
         </div>
         <div class="form-group">
-            <label>Waktu</label>
-            <input type="time" name="waktu" class="form-control" required>
+            <label>Waktu Mulai</label>
+            <input type="time" name="waktu_mulai" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Waktu selesai</label>
+            <input type="time" name="waktu_selesai" class="form-control" required>
         </div>
         <div class="form-group">
             <label>Lokasi</label>

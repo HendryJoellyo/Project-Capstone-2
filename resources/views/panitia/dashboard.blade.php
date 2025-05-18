@@ -29,7 +29,8 @@
             <th>No</th>
             <th>Nama Event</th>
             <th>Tanggal</th>
-            <th>Waktu</th>
+            <th>waktu_mulai</th>
+            <th>waktu_selesai</th>
             <th>Lokasi</th>
             <th>Narasumber</th>
             <th>Poster</th>
@@ -43,7 +44,8 @@
             <td>{{ $loop->iteration }}</td>
             <td>{{ $event->nama_event }}</td>
             <td>{{ $event->tanggal }}</td>
-            <td>{{ $event->waktu }}</td>
+            <td>{{ $event->waktu_mulai }}</td>
+            <td>{{ $event->waktu_selesai }}</td>
             <td>{{ $event->lokasi }}</td>
             <td>{{ $event->narasumber }}</td>
             <td><img src="{{ asset('storage/' . $event->poster) }}" width="120"></td>

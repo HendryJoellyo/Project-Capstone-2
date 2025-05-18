@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PanitiaController;
 use App\Http\Controllers\Keuangan\DashboardKeuanganController;
 use App\Http\Controllers\Panitia\DashboardPanitiaController;
 use App\Http\Controllers\Panitia\EventController;
+use App\Http\Controllers\HomeController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KeuanganMiddleware;
 use App\Http\Middleware\PanitiaMiddleware;
@@ -66,9 +67,7 @@ Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::cla
 
 
 // Login sebagai Member
-Route::get('/home', function () {
-    return view('index');
-})->name('index');
+Route::get('/home', [HomeController::class, 'index'])->name('index');
 
 
 
