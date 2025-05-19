@@ -12,11 +12,8 @@ class CreateEventRegistrationsTable extends Migration
             $table->id('id_event_registrations');
             $table->foreignId('id_users')->constrained('users', 'id_users');
             $table->foreignId('id_events')->constrained('events', 'id_events');
-            $table->enum('status_pembayaran', ['pending', 'verified', 'rejected']);
             $table->string('bukti_pembayaran', 45);
-            $table->string('qr_code', 45);
-            $table->enum('status_kehadiran', ['hadir', 'tidak hadir']);
-            $table->string('sertifikat', 45);
+            $table->enum('status_pembayaran', ['pending', 'verified', 'rejected']);
             $table->timestamps();
         });
     }
@@ -26,3 +23,4 @@ class CreateEventRegistrationsTable extends Migration
         Schema::dropIfExists('event_registrations');
     }
 }
+

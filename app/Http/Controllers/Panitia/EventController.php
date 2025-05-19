@@ -19,13 +19,13 @@ class EventController extends Controller
         return view('panitia.events.create');
     }
 
-
     public function store(Request $request)
     {
         $validated = $request->validate([
             'nama_event' => 'required|string|max:255',
             'tanggal' => 'required|date',
-            'waktu' => 'required',
+            'waktu_mulai' => 'required',
+            'waktu_selesai' => 'required',
             'lokasi' => 'required|string|max:255',
             'narasumber' => 'required|string|max:255',
             'poster' => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -41,4 +41,6 @@ class EventController extends Controller
 
         return redirect()->route('panitia.events.index')->with('success', 'Event berhasil ditambahkan!');
     }
+
+        
 }

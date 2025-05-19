@@ -120,3 +120,120 @@
     });
 
 })(jQuery);
+
+// Upload bukti bayar
+function triggerUpload(eventId) {
+    document.getElementById('upload_event_id').value = eventId;
+    document.getElementById('upload_file_input').click();
+}
+
+function openUploadModal(eventId) {
+    document.getElementById('modal_event_id').value = eventId;
+    document.getElementById('uploadModal').style.display = 'block';
+}
+
+function closeUploadModal() {
+    document.getElementById('uploadModal').style.display = 'none';
+}
+
+//Simpan register ke database
+function simpanRegistrasi(eventId, result) {
+    fetch('/register-event', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            event_id: eventId,
+            transaction_id: result.transaction_id,
+            status: result.transaction_status
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Registrasi Berhasil!',
+            text: 'Data registrasi telah disimpan.'
+        });
+    })
+    .catch(error => {
+        console.error('Gagal simpan registrasi:', error);
+    });
+}
+
+
+
+
+function daftarEvent(e, eventId) {
+    e.preventDefault();
+
+    // Simpan registrasi dulu
+    fetch('/register-event', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            event_id: eventId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 409) {
+                throw new Error('Kamu sudah mendaftar event ini!');
+            }
+            throw new Error('Gagal simpan data registrasi.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Registrasi berhasil:', data);
+
+        // 2️⃣ Baru ambil Snap Token
+        return fetch('/get-snap-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ event_id: eventId })
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Snap Token:', data.token);
+
+        // 3️⃣ Tampilkan Midtrans popup
+        window.snap.pay(data.token, {
+            onSuccess: function(result){
+                console.log("Pembayaran sukses:", result);
+                // Kalau mau update status pembayaran di sini
+            },
+            onPending: function(result){
+                console.log("Menunggu pembayaran:", result);
+                // Bisa update status pending di sini kalau perlu
+            },
+            onError: function(result){
+                console.log("Pembayaran error:", result);
+            },
+            onClose: function(){
+                console.log("Popup ditutup tanpa transaksi");
+            }
+        });
+    })
+    .catch(error => {
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: error.message,
+        });
+    });
+}
+

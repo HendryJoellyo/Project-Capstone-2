@@ -8,17 +8,17 @@ use App\Http\Controllers\Keuangan\DashboardKeuanganController;
 use App\Http\Controllers\Panitia\DashboardPanitiaController;
 use App\Http\Controllers\Panitia\EventController;
 use App\Http\Controllers\Pembayaran\PaymentController;
-
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\EventRegistrationController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KeuanganMiddleware;
 use App\Http\Middleware\PanitiaMiddleware;
+use App\Http\Middleware\CheckFrontendMember;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-
-
+// Admin routes
 Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])->name('admin.')->group(function () {
-    // Dashboard Role
     Route::get('/dashboard', [RoleController::class, 'dashboard'])->name('roles.dashboard');
 
     // CRUD Role
@@ -38,7 +38,8 @@ Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])
         Route::put('/{keuangans}', [KeuanganController::class, 'update'])->name('update');
         Route::delete('/{keuangans}', [KeuanganController::class, 'destroy'])->name('destroy');
     });
-     //CRUD Panitia Event
+
+    // CRUD Panitia Event
     Route::prefix('TPanitia')->name('panitias.')->group(function () {
         Route::get('/dashboard', [PanitiaController::class, 'dashboard'])->name('dashboard');
         Route::get('/create', [PanitiaController::class, 'create'])->name('create');
@@ -47,46 +48,50 @@ Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])
         Route::put('/{panitias}', [PanitiaController::class, 'update'])->name('update');
         Route::delete('/{panitias}', [PanitiaController::class, 'destroy'])->name('destroy');
     });
-    
 });
 
-//Login sebagai Tim Keuangan
+// Login sebagai Tim Keuangan
 Route::prefix('keuangan')->middleware(['auth', 'verified', KeuanganMiddleware::class])->name('keuangan.')->group(function () {
     Route::get('/dashboard', [DashboardKeuanganController::class, 'index'])->name('dashboard');
+    Route::post('/update-status-pembayaran', [DashboardKeuanganController::class, 'updateStatusPembayaran'])->name('update.status.pembayaran');
+
+
 });
 
-//Login sebagai Panitia Event
+// Login sebagai Panitia Event
 Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::class])->name('panitia.')->group(function () {
     Route::get('/dashboard', [DashboardPanitiaController::class, 'index'])->name('dashboard');
-    
+
     // Route event
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
 });
 
-// Login sebagai Member
-Route::get('/home', [HomeController::class, 'index'])->name('index');
-Route::post('/get-snap-token', [PaymentController::class, 'processPayment'])
-    ->middleware('auth')
-    ->name('get-snap-token');
+// Public Frontend Routes — khusus Member + Guest (user biasa)
+Route::middleware([CheckFrontendMember::class])->group(function () {
+    Route::get('/home', [HomeController::class, 'index'])->name('index');
+    Route::post('/get-snap-token', [PaymentController::class, 'processPayment'])->middleware('auth')->name('get-snap-token');
+    Route::post('/upload-bukti', [EventRegistrationController::class, 'uploadBukti'])->name('upload.bukti');
+    Route::post('/update-status/{id}', [EventRegistrationController::class, 'updateStatus'])->name('update.status');
+    Route::post('/register-event', [EventRegistrationController::class, 'daftarEvent'])->middleware('auth');
+    
 
+    Route::get('/schedule', function () {
+        return view('schedule');
+    })->name('schedule');
 
+    Route::get('/', function () {
+        return redirect('/home');
+    });
+});
+
+// Force logout route
 Route::get('/force-logout', function () {
     Auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
     return redirect('/login');
 });
-
-Route::get('/', function () {
-    return redirect('/home');
-});
-
-Route::get('/schedule', function () {
-    return view('schedule');
-})->name('schedule');
-
-
 
 require __DIR__.'/auth.php';

@@ -10,18 +10,22 @@ class EventRegistration extends Model
     protected $primaryKey = 'id_event_registrations';
 
     protected $fillable = [
-        'id_users', 'id_events', 'status_pembayaran',
-        'bukti_pembayaran', 'qr_code', 'status_kehadiran',
-        'sertifikat', 'created_at', 'updated_at'
-    ];
+    'id_users', 'id_events', 'status_pembayaran',
+    'bukti_pembayaran', 'transaction_id', 'created_at', 'updated_at'
+];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'id_users');
-    }
+    
+
 
     public function event()
-    {
-        return $this->belongsTo(Event::class, 'id_events');
-    }
+{
+    return $this->belongsTo(Event::class, 'id_events', 'id_events');
+}
+
+public function user()
+{
+    return $this->belongsTo(User::class, 'id_users', 'id_users');
+}
+
+
 }

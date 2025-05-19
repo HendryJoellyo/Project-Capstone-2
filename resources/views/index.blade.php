@@ -156,14 +156,25 @@
                                                                 <li><i class="fa fa-map-marker"></i> {{ $event->lokasi }}</li>
                                                                 <li><i class="fa fa-group"></i> {{ $event->jumlah_peserta }} orang</li>
                                                                 <li><i class="fa fa-money"></i> {{ $event->biaya_registrasi }} IDR</li>
+
                                                                 @if(Auth::check() && Auth::user()->id_roles == 13)
-                                                                  <button onclick="daftarEvent({{ $event->id_events }})" class="daftar">Daftar</button>
+                                                                    <li>
+                                                                      
+                                                                            <input type="hidden" name="event_id" value="{{ $event->id_events }}">
+                                                                            <button onclick="daftarEvent(event, {{ $event->id_events }})" class="daftar">Daftar</button>
+                                                              
+                                                                    </li>
+                                                                    <li>
+                                                                        <button onclick="triggerUpload({{ $event->id_events }})" class="BuktiBayar">Upload Bukti Bayar</button>
+                                                                    </li>
                                                                 @else
-                                                                    <button class="daftar" onclick="showLoginAlert()">Daftar</button>
+                                                                    <li>
+                                                                        <button class="daftar" onclick="showLoginAlert()">Daftar</button>
+                                                                    </li>
                                                                 @endif
                                                             </ul>
                                                         </div>
-                                                        
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -178,6 +189,12 @@
             </div>
 
     </section>
+<form id="uploadBuktiForm" action="{{ route('upload.bukti') }}" method="POST" enctype="multipart/form-data" style="display:none">
+    @csrf
+    <input type="hidden" name="event_id" id="upload_event_id">
+    <input type="file" name="bukti_pembayaran" id="upload_file_input" accept="image/*" onchange="document.getElementById('uploadBuktiForm').submit()">
+</form>
+
     <!-- Modal untuk menampilkan gambar full -->
 <div id="imageModal" class="image-modal" onclick="closeModal()">
     <span class="close">&times;</span>
@@ -189,10 +206,12 @@
         <h4>Silakan login atau register dulu</h4>
         <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
         <a href="{{ route('register') }}" class="btn btn-secondary">Register</a>
+        
         <br><br>
         <button onclick="closeLoginPopup()" class="btn btn-danger">Tutup</button>
     </div>
 </div>
+
 
     <!-- Footer Section Begin -->
     @include('layouts.footer')
@@ -209,21 +228,12 @@
     <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
-
-
+    
     <script>
-function openModal(src) {
-    document.getElementById("modalImage").src = src;
-    document.getElementById("imageModal").style.display = "block";
-}
-
-function closeModal() {
-    document.getElementById("imageModal").style.display = "none";
-}
-</script>
-
-<script>
-    function showLoginAlert() {
+    const getSnapTokenUrl = "{{ route('get-snap-token') }}";
+    </script>
+    <script>
+        function showLoginAlert() {
         Swal.fire({
             title: 'Pendaftaran ditolak',
             text: 'Silakan login atau register sebagai member untuk mendaftar event ini.',
@@ -240,54 +250,8 @@ function closeModal() {
             }
         });
     }
-</script>
+    </script>
 
-<!-- Midtrans buat pembayaran -->
-<script>
-        console.log("URL Snap Token:", '{{ route("get-snap-token") }}');
-
-
-        function daftarEvent(eventId) {
-    fetch('/get-snap-token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({ event_id: eventId })
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('HTTP status ' + response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Snap Token:', data.token);
-        window.snap.pay(data.token, {
-            onSuccess: function(result){
-                console.log("Pembayaran sukses:", result);
-            },
-            onPending: function(result){
-                console.log("Menunggu pembayaran:", result);
-            },
-            onError: function(result){
-                console.log("Pembayaran error:", result);
-            },
-            onClose: function(){
-                console.log("Popup ditutup tanpa transaksi");
-            }
-        });
-    })
-    .catch(error => {
-        console.error('Gagal ambil Snap Token:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'Gagal ambil Snap Token',
-        });
-    });
-}
-
-</script>
 </body>
+
 </html>
