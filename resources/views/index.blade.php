@@ -24,6 +24,12 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}" type="text/css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
 
 </head>
@@ -129,7 +135,10 @@
                                                     <div class="row">
                                                         <div class="col-lg-3">
                                                             <div class="sc-pic">
-                                                                <img src="{{ asset('storage/' . $event->poster) }}" alt="{{ $event->nama_event }}">
+                                                                <img src="{{ asset('storage/' . $event->poster) }}" 
+                                                                    alt="{{ $event->nama_event }}" 
+                                                                    style="cursor:pointer" 
+                                                                    onclick="openModal(this.src)">
                                                             </div>
                                                         </div>
                                                         <div class="col-lg-5">
@@ -145,8 +154,16 @@
                                                             <ul class="sc-widget">
                                                                 <li><i class="fa fa-clock-o"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}</li>
                                                                 <li><i class="fa fa-map-marker"></i> {{ $event->lokasi }}</li>
+                                                                <li><i class="fa fa-group"></i> {{ $event->jumlah_peserta }} orang</li>
+                                                                <li><i class="fa fa-money"></i> {{ $event->biaya_registrasi }} IDR</li>
+                                                                @if(Auth::check() && Auth::user()->id_roles == 13)
+                                                                  <button onclick="daftarEvent({{ $event->id_events }})" class="daftar">Daftar</button>
+                                                                @else
+                                                                    <button class="daftar" onclick="showLoginAlert()">Daftar</button>
+                                                                @endif
                                                             </ul>
                                                         </div>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -161,7 +178,21 @@
             </div>
 
     </section>
-    <!-- Schedule Section End -->
+    <!-- Modal untuk menampilkan gambar full -->
+<div id="imageModal" class="image-modal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+
+<div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+    <div style="background:#fff; padding:20px; margin:100px auto; width:300px; border-radius:8px; text-align:center;">
+        <h4>Silakan login atau register dulu</h4>
+        <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
+        <a href="{{ route('register') }}" class="btn btn-secondary">Register</a>
+        <br><br>
+        <button onclick="closeLoginPopup()" class="btn btn-danger">Tutup</button>
+    </div>
+</div>
 
     <!-- Footer Section Begin -->
     @include('layouts.footer')
@@ -177,7 +208,86 @@
     <script src="{{ asset('js/jquery.slicknav.js') }}"></script>
     <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 
+
+    <script>
+function openModal(src) {
+    document.getElementById("modalImage").src = src;
+    document.getElementById("imageModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("imageModal").style.display = "none";
+}
+</script>
+
+<script>
+    function showLoginAlert() {
+        Swal.fire({
+            title: 'Pendaftaran ditolak',
+            text: 'Silakan login atau register sebagai member untuk mendaftar event ini.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Login',
+            cancelButtonText: 'Register',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('login') }}";
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                window.location.href = "{{ route('register') }}";
+            }
+        });
+    }
+</script>
+
+<!-- Midtrans buat pembayaran -->
+<script>
+        console.log("URL Snap Token:", '{{ route("get-snap-token") }}');
+
+
+        function daftarEvent(eventId) {
+    fetch('/get-snap-token', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ event_id: eventId })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Snap Token:', data.token);
+        window.snap.pay(data.token, {
+            onSuccess: function(result){
+                console.log("Pembayaran sukses:", result);
+            },
+            onPending: function(result){
+                console.log("Menunggu pembayaran:", result);
+            },
+            onError: function(result){
+                console.log("Pembayaran error:", result);
+            },
+            onClose: function(){
+                console.log("Popup ditutup tanpa transaksi");
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Gagal ambil Snap Token:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Gagal ambil Snap Token',
+        });
+    });
+}
+
+</script>
 </body>
-
 </html>

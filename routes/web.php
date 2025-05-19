@@ -7,11 +7,15 @@ use App\Http\Controllers\Admin\PanitiaController;
 use App\Http\Controllers\Keuangan\DashboardKeuanganController;
 use App\Http\Controllers\Panitia\DashboardPanitiaController;
 use App\Http\Controllers\Panitia\EventController;
+use App\Http\Controllers\Pembayaran\PaymentController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KeuanganMiddleware;
 use App\Http\Middleware\PanitiaMiddleware;
 use Illuminate\Support\Facades\Route;
+
+
 
 Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])->name('admin.')->group(function () {
     // Dashboard Role
@@ -61,16 +65,11 @@ Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::cla
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
 });
 
-
-
-
-
-
 // Login sebagai Member
 Route::get('/home', [HomeController::class, 'index'])->name('index');
-
-
-
+Route::post('/get-snap-token', [PaymentController::class, 'processPayment'])
+    ->middleware('auth')
+    ->name('get-snap-token');
 
 
 Route::get('/force-logout', function () {
@@ -80,11 +79,13 @@ Route::get('/force-logout', function () {
     return redirect('/login');
 });
 
-
-
 Route::get('/', function () {
     return redirect('/home');
 });
+
+Route::get('/schedule', function () {
+    return view('schedule');
+})->name('schedule');
 
 
 
