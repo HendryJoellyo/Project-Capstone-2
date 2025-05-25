@@ -4,33 +4,48 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Support\Carbon;
+use App\Models\EventRegistration;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     public function index()
-    {
-        // Mulai dari hari ini (awal hari)
-        $startDate = Carbon::now()->startOfDay();
+{
+    $startDate = Carbon::now()->startOfDay();
+    $endDate = (clone $startDate)->addDays(6)->endOfDay();
 
-        // Tambahkan 6 hari untuk rentang 7 hari total
-        $endDate = (clone $startDate)->addDays(6)->endOfDay();
+    $eventsInWeek = Event::whereBetween('tanggal', [$startDate, $endDate])
+        ->orderBy('tanggal')
+        ->get();
 
-        // Ambil semua event dalam rentang 7 hari mulai dari hari ini
-        $eventsInWeek = Event::whereBetween('tanggal', [$startDate, $endDate])
-                             ->orderBy('tanggal')
-                             ->get();
+    foreach ($eventsInWeek as $event) {
+        // Hitung jumlah peserta yang sudah verified bayar
+        $registrasi_terverifikasi = EventRegistration::where('id_events', $event->id_events)
+            ->where('status_pembayaran', 'verified')
+            ->count();
 
-        // Group event berdasarkan tanggal (format Y-m-d)
-        $eventsByDate = $eventsInWeek->groupBy(function ($event) {
-            // Pastikan tanggal event sudah di-cast ke Carbon di model, 
-            // jika tidak, parse manual: Carbon::parse($event->tanggal)
-            return Carbon::parse($event->tanggal)->format('Y-m-d');
-        });
-
-        return view('index', [
-            'eventsByDate' => $eventsByDate,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-        ]);
+        // Simpan slot tersedia di property tambahan
+        $event->slot_tersedia = $event->jumlah_peserta - $registrasi_terverifikasi;
     }
+
+    $eventsByDate = $eventsInWeek->groupBy(function ($event) {
+        return Carbon::parse($event->tanggal)->format('Y-m-d');
+    });
+
+    $registrations = [];
+    if (Auth::check()) {
+        $registrations = EventRegistration::where('id_users', Auth::id())
+            ->pluck('status_pembayaran', 'id_events')
+            ->toArray();
+    }
+
+    return view('index', [
+        'eventsByDate' => $eventsByDate,
+        'startDate' => $startDate,
+        'endDate' => $endDate,
+        'registrations' => $registrations,
+    ]);
+}
+
+
 }

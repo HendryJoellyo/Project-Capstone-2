@@ -46,9 +46,7 @@
             <div class="row">
                 <div class="col-lg-7">
                     <div class="hero-text">
-                        <span>5 to 9 may 2019, mardavall hotel, New York</span>
-                        <h2>Change Your Mind<br /> To Become Sucess</h2>
-                        <a href="#" class="primary-btn">Buy Ticket</a>
+                       <h2>Kuliah Nggak Cuma Belajar<br /> Yuk Ikut Event Seru Bareng!</h2>   
                     </div>
                 </div>
                 <div class="col-lg-5">
@@ -70,19 +68,15 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="ha-text">
-                        <h2>About Conference</h2>
-                        <p>When I first got into the online advertising business, I was looking for the magical
-                            combination that would put my website into the top search engine rankings, catapult me to
-                            the forefront of the minds or individuals looking to buy my product, and generally make me
-                            rich beyond my wildest dreams! After succeeding in the business for this long, I’m able to
-                            look back on my old self with this kind of thinking and shake my head.</p>
-                        <ul>
-                            <li><span class="icon_check"></span> Write On Your Business Card</li>
-                            <li><span class="icon_check"></span> Advertising Outdoors</li>
-                            <li><span class="icon_check"></span> Effective Advertising Pointers</li>
-                            <li><span class="icon_check"></span> Kook 2 Directory Add Url Free</li>
-                        </ul>
-                        <a href="#" class="ha-btn">Discover Now</a>
+                        <h2>About Event</h2>
+                        <p>Jujur aja, waktu pertama kali kepikiran bikin event, kami sempat mikir bakal gampang. 
+                            Tinggal sebar info, langsung rame, terus acara sukses besar. Tapi ternyata, 
+                            bikin event itu nggak sesederhana itu. Dari cari ide, diskusi, cari sponsor, sampai ngurus peserta, 
+                            semua butuh effort dan kerjasama tim. Nah, dari situ kami belajar, kalau hal seru itu bukan cuma soal 
+                            hasil akhirnya, tapi juga proses seru di baliknya. Makanya event ini kami adain, biar jadi wadah buat 
+                            mahasiswa kumpul bareng, kenalan sama teman baru, nambah ilmu, dan pastinya dapet pengalaman seru yang 
+                            nggak bakal dilupain waktu kuliah.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -124,7 +118,7 @@
                                     @php $dayIndex++; @endphp
                                 @endforeach
                             </ul><!-- Tab panes -->
-
+                                
                             <div class="tab-content">
                                 @php $dayIndex = 1; @endphp
                                 @foreach($eventsByDate as $date => $events)
@@ -145,8 +139,8 @@
                                                             <div class="sc-text">
                                                                 <h4>{{ $event->nama_event }}</h4>
                                                                 <ul>
-                                                                    <li><i class="fa fa-user"></i> {{ $event->narasumber }}</li>
-                                                                    <li><i class="fa fa-calendar"></i> {{ \Carbon\Carbon::parse($event->tanggal)->format('d M Y') }}</li>
+                                                                    <li><i class="fa fa-user"  style="color: #1d6ac1;"></i> {{ $event->narasumber }}</li>
+                                                                    <li><i class="fa fa-calendar"  style="color: #1d6ac1;"></i> {{ \Carbon\Carbon::parse($event->tanggal)->format('d M Y') }}</li>
                                                                 </ul>
                                                             </div>
                                                         </div>
@@ -155,23 +149,49 @@
                                                                 <li><i class="fa fa-clock-o"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}</li>
                                                                 <li><i class="fa fa-map-marker"></i> {{ $event->lokasi }}</li>
                                                                 <li><i class="fa fa-group"></i> {{ $event->jumlah_peserta }} orang</li>
-                                                                <li><i class="fa fa-money"></i> {{ $event->biaya_registrasi }} IDR</li>
-
+                                                                <li  style="color:red; font-weight: bold;"><i class="fa fa-group"></i>
+                                                                    @if ($event->slot_tersedia > 0)
+                                                                        {{ $event->slot_tersedia }} slot
+                                                                    @else
+                                                                        <span style="color: red; font-weight: bold;">Slot Habis</span>
+                                                                    @endif
+                                                                </li>
+                                                                <li style="color: green; font-weight: bold;"><i class="fa fa-money" style="color: green;"></i> {{ $event->biaya_registrasi }} IDR</li>
+                                                              @if ($event->slot_tersedia > 0)
                                                                 @if(Auth::check() && Auth::user()->id_roles == 13)
                                                                     <li>
-                                                                      
-                                                                            <input type="hidden" name="event_id" value="{{ $event->id_events }}">
-                                                                            <button onclick="daftarEvent(event, {{ $event->id_events }})" class="daftar">Daftar</button>
-                                                              
+                                                                        <input type="hidden" name="event_id" value="{{ $event->id_events }}">
+                                                                        <button onclick="daftarEvent(event, {{ $event->id_events }})" class="daftar">Daftar</button>
                                                                     </li>
                                                                     <li>
-                                                                        <button onclick="triggerUpload({{ $event->id_events }})" class="BuktiBayar">Upload Bukti Bayar</button>
+                                                                        @php
+                                                                            $status = $registrations[$event->id_events] ?? null;
+                                                                        @endphp
+
+                                                                        @if($status == 'pending' || $status == 'settlement')
+                                                                            <button onclick="triggerUpload({{ $event->id_events }})" class="BuktiBayar">
+                                                                                Upload Bukti Bayar
+                                                                            </button>
+                                                                        @else
+                                                                            <button class="BuktiBayar" disabled
+                                                                                style="background:#ccc; cursor:not-allowed; opacity:0.6;">
+                                                                                Upload Bukti Bayar
+                                                                            </button>
+                                                                        @endif
                                                                     </li>
                                                                 @else
                                                                     <li>
                                                                         <button class="daftar" onclick="showLoginAlert()">Daftar</button>
                                                                     </li>
                                                                 @endif
+                                                            @else
+                                                                <li>
+                                                                    <button class="daftar" disabled style="background:#ccc; cursor:not-allowed; opacity:0.6;">
+                                                                        Slot Habis
+                                                                    </button>
+                                                                </li>
+                                                            @endif
+
                                                             </ul>
                                                         </div>
 
@@ -251,6 +271,9 @@
         });
     }
     </script>
+
+
+
 
 </body>
 

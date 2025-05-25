@@ -16,17 +16,26 @@ class EventRegistrationController extends Controller
             'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
+        $userId = auth()->user()->id_users;
+
+        // Cari registrasi yang sudah ada
+        $registration = EventRegistration::where('id_users', $userId)
+                            ->where('id_events', $request->event_id)
+                            ->first();
+
+        if (!$registration) {
+            return back()->with('error', 'Registrasi event tidak ditemukan.');
+        }
+
+        // Upload file
         $file = $request->file('bukti_pembayaran');
         $filename = time() . '_' . $file->getClientOriginalName();
         $file->move(public_path('uploads/bukti_pembayaran'), $filename);
 
-        EventRegistration::create([
-            'id_users'         => auth()->user()->id_users,  // disesuaikan ke id_members
-            'id_events'          => $request->event_id,
-            'bukti_pembayaran'   => $filename,
-            'status_pembayaran'  => 'pending',
-            'created_at'         => Carbon::now(),
-            'updated_at'         => Carbon::now(),
+        // Update bukti pembayaran
+        $registration->update([
+            'bukti_pembayaran'  => $filename,
+            'updated_at'        => now(),
         ]);
 
         return back()->with('success', 'Bukti pembayaran berhasil diupload!');
@@ -40,42 +49,48 @@ class EventRegistrationController extends Controller
         ]);
 
         $registration = EventRegistration::findOrFail($id);
+
         $registration->update([
             'status_pembayaran' => $request->status_pembayaran,
-            'updated_at'        => Carbon::now(),
+            'updated_at'        => now(),
         ]);
 
         return back()->with('success', 'Status pembayaran berhasil diupdate!');
     }
 
-   public function daftarEvent(Request $request)
+    // Daftar Event
+    public function daftarEvent(Request $request)
 {
-    // ambil data dari JSON body
-    $data = $request->json()->all();
-
-    // Validasi
-    $validator = \Validator::make($data, [
+    $request->validate([
         'event_id' => 'required|exists:events,id_events',
     ]);
 
-    if ($validator->fails()) {
-        return response()->json(['error' => $validator->errors()], 422);
-    }
+    $userId = auth()->user()->id_users;
 
-    // Cek duplikasi pendaftaran
-    $exists = EventRegistration::where('id_users', auth()->user()->id_users)
-                                ->where('id_events', $data['event_id'])
+    // Cek apakah sudah pernah daftar
+    $exists = EventRegistration::where('id_users', $userId)
+                                ->where('id_events', $request->event_id)
                                 ->first();
 
     if ($exists) {
         return response()->json(['error' => 'Kamu sudah mendaftar event ini!'], 409);
     }
 
-    // Simpan registrasi
+    // Cek slot tersisa
+    $event = \App\Models\Event::findOrFail($request->event_id);
+    $jumlahTerdaftar = EventRegistration::where('id_events', $event->id_events)
+                        ->where('status_pembayaran', 'verified')
+                        ->count();
+
+    if ($jumlahTerdaftar >= $event->jumlah_peserta) {
+        return response()->json(['error' => 'Slot sudah habis.'], 409);
+    }
+
+    // Simpan registrasi baru
     $registration = EventRegistration::create([
-        'id_users'           => auth()->user()->id_users,
-        'id_events'          => $data['event_id'],
-        'bukti_pembayaran'   => '', // kosong dulu
+        'id_users'           => $userId,
+        'id_events'          => $request->event_id,
+        'bukti_pembayaran'   => null,
         'status_pembayaran'  => 'pending',
         'created_at'         => now(),
         'updated_at'         => now(),
@@ -87,8 +102,6 @@ class EventRegistrationController extends Controller
         'data'    => $registration
     ]);
 }
-
-
 
 
 }
