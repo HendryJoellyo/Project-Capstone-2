@@ -124,61 +124,69 @@
                                 @foreach($eventsByDate as $date => $events)
                                     <div class="tab-pane @if($loop->first) active @endif" id="tabs-{{ $dayIndex }}" role="tabpanel">
                                         @foreach ($events as $event)
-                                            <div class="st-content">
-                                                <div class="container">
-                                                    <div class="row">
-                                                        <div class="col-lg-3">
-                                                            <div class="sc-pic">
-                                                                <img src="{{ asset('storage/' . $event->poster) }}" 
-                                                                    alt="{{ $event->nama_event }}" 
-                                                                    style="cursor:pointer" 
-                                                                    onclick="openModal(this.src)">
+                                                <div class="st-content">
+                                                    <div class="container">
+                                                        <div class="row">
+                                                            <div class="col-lg-3">
+                                                                <div class="sc-pic">
+                                                                    <img src="{{ asset('storage/' . $event->poster) }}" 
+                                                                        alt="{{ $event->nama_event }}" 
+                                                                        style="cursor:pointer" 
+                                                                        onclick="openModal(this.src)">
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-lg-5">
-                                                            <div class="sc-text">
-                                                                <h4>{{ $event->nama_event }}</h4>
-                                                                <ul>
-                                                                    <li><i class="fa fa-user"  style="color: #1d6ac1;"></i> {{ $event->narasumber }}</li>
-                                                                    <li><i class="fa fa-calendar"  style="color: #1d6ac1;"></i> {{ \Carbon\Carbon::parse($event->tanggal)->format('d M Y') }}</li>
-                                                                </ul>
+                                                            <div class="col-lg-5">
+                                                                <div class="sc-text">
+                                                                    <h4>{{ $event->nama_event }}</h4>
+                                                                    <ul>
+                                                                        <li><i class="fa fa-user" style="color: #1d6ac1;"></i> {{ $event->narasumber }}</li>
+                                                                        <li><i class="fa fa-calendar"  style="color: #1d6ac1;"></i> {{ \Carbon\Carbon::parse($event->tanggal)->format('d M Y') }}</li>
+                                                                        <li><i class="fa fa-group" style="color: #1d6ac1;"></i> {{ $event->jumlah_peserta }} orang</li>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-lg-4">
-                                                            <ul class="sc-widget">
-                                                                <li><i class="fa fa-clock-o"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}</li>
-                                                                <li><i class="fa fa-map-marker"></i> {{ $event->lokasi }}</li>
-                                                                <li><i class="fa fa-group"></i> {{ $event->jumlah_peserta }} orang</li>
-                                                                <li  style="color:red; font-weight: bold;"><i class="fa fa-group"></i>
-                                                                    @if ($event->slot_tersedia > 0)
-                                                                        {{ $event->slot_tersedia }} slot
-                                                                    @else
-                                                                        <span style="color: red; font-weight: bold;">Slot Habis</span>
-                                                                    @endif
-                                                                </li>
-                                                                <li style="color: green; font-weight: bold;"><i class="fa fa-money" style="color: green;"></i> {{ $event->biaya_registrasi }} IDR</li>
-                                                              @if ($event->slot_tersedia > 0)
+                                                            <div class="col-lg-4">
+                                                                <ul class="sc-widget">
+                                                                    <li><i class="fa fa-clock-o"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}</li>
+                                                                    <li><i class="fa fa-map-marker"></i> {{ $event->lokasi }}</li>
+                                                                    
+                                                                    <li  style="color:red; font-weight: bold;"><i class="fa fa-group"></i>
+                                                                        @if ($event->slot_tersedia > 0)
+                                                                            {{ $event->slot_tersedia }} slot
+                                                                        @else
+                                                                            <span style="color: red; font-weight: bold;">Slot Habis</span>
+                                                                        @endif
+                                                                    </li>
+                                                                    <li style="color: green; font-weight: bold;"><i class="fa fa-money" style="color: green;"></i> {{ $event->biaya_registrasi }} IDR</li>
+                                                               @if ($event->slot_tersedia > 0)
                                                                 @if(Auth::check() && Auth::user()->id_roles == 13)
                                                                     <li>
                                                                         <input type="hidden" name="event_id" value="{{ $event->id_events }}">
-                                                                        <button onclick="daftarEvent(event, {{ $event->id_events }})" class="daftar">Daftar</button>
-                                                                    </li>
-                                                                    <li>
-                                                                        @php
-                                                                            $status = $registrations[$event->id_events] ?? null;
-                                                                        @endphp
 
-                                                                        @if($status == 'pending' || $status == 'settlement')
-                                                                            <button onclick="triggerUpload({{ $event->id_events }})" class="BuktiBayar">
-                                                                                Upload Bukti Bayar
-                                                                            </button>
-                                                                        @else
-                                                                            <button class="BuktiBayar" disabled
-                                                                                style="background:#ccc; cursor:not-allowed; opacity:0.6;">
-                                                                                Upload Bukti Bayar
-                                                                            </button>
+                                                                       @php
+                                                                        $status = $registrations[$event->id_events] ?? null;
+                                                                    @endphp
+
+                                                                    @if(is_null($status))
+                                                                        {{-- Belum daftar sama sekali --}}
+                                                                        <button onclick="daftarEvent(event, {{ $event->id_events }}, '{{ addslashes($event->nama_event) }}')" class="daftar">Daftar</button>
+
+                                                                        @elseif($status == 'pending')
+                                                                        {{-- Sudah daftar, belum upload --}}
+                                                                        <button 
+                                                                            id="btnUpload{{ $event->id_events }}" 
+                                                                            onclick="triggerUpload({{ $event->id_events }})" 
+                                                                            class="BuktiBayar">
+                                                                            Upload Bukti Bayar
+                                                                        </button>
+
+                                                                        @elseif($status == 'proses')
+                                                                        {{-- Sudah upload, nunggu verifikasi --}}
+                                                                        <span style="font-weight:bold; color:orange;">Sedang memproses pendaftaran</span>
+
+                                                                        @elseif($status == 'verified')
+                                                                        <span style="font-weight:bold; color:green;">Anda sudah mendaftar event ini</span>
                                                                         @endif
-                                                                    </li>
                                                                 @else
                                                                     <li>
                                                                         <button class="daftar" onclick="showLoginAlert()">Daftar</button>
@@ -192,12 +200,12 @@
                                                                 </li>
                                                             @endif
 
-                                                            </ul>
-                                                        </div>
+                                                                </ul>
+                                                            </div>
 
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
                                         @endforeach
                                     </div>
                                     @php $dayIndex++; @endphp
@@ -207,13 +215,14 @@
                     </div>
                 </div>
             </div>
+        <form id="uploadForm" style="display:none;">
+            @csrf
+            <input type="hidden" id="upload_event_id" name="event_id">
+            <input type="file" id="upload_file_input" name="bukti_pembayaran" accept="image/*">
+        </form>
+
 
     </section>
-<form id="uploadBuktiForm" action="{{ route('upload.bukti') }}" method="POST" enctype="multipart/form-data" style="display:none">
-    @csrf
-    <input type="hidden" name="event_id" id="upload_event_id">
-    <input type="file" name="bukti_pembayaran" id="upload_file_input" accept="image/*" onchange="document.getElementById('uploadBuktiForm').submit()">
-</form>
 
     <!-- Modal untuk menampilkan gambar full -->
 <div id="imageModal" class="image-modal" onclick="closeModal()">

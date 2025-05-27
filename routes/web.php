@@ -10,6 +10,7 @@ use App\Http\Controllers\Panitia\EventController;
 use App\Http\Controllers\Pembayaran\PaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventRegistrationController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KeuanganMiddleware;
 use App\Http\Middleware\PanitiaMiddleware;
@@ -72,14 +73,18 @@ Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::cla
 Route::middleware([CheckFrontendMember::class])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('index');
     Route::post('/get-snap-token', [PaymentController::class, 'processPayment'])->middleware('auth')->name('get-snap-token');
-    Route::post('/upload-bukti', [EventRegistrationController::class, 'uploadBukti'])->name('upload.bukti');
+    Route::post('/upload-bukti', [EventRegistrationController::class, 'uploadBukti'])->name('upload.bukti')->middleware('auth');
     Route::post('/update-status/{id}', [EventRegistrationController::class, 'updateStatus'])->name('update.status');
     Route::post('/register-event', [EventRegistrationController::class, 'daftarEvent'])->middleware('auth');
-    
+    Route::get('/history-notif-count', [HistoryController::class, 'getNotifCount']);
+    Route::get('/history', [EventRegistrationController::class, 'history'])->name('history')->middleware('auth');
+
 
     Route::get('/schedule', function () {
         return view('schedule');
     })->name('schedule');
+
+    
 
     Route::get('/', function () {
         return redirect('/home');
@@ -93,5 +98,6 @@ Route::get('/force-logout', function () {
     request()->session()->regenerateToken();
     return redirect('/login');
 });
+
 
 require __DIR__.'/auth.php';

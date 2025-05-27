@@ -127,47 +127,80 @@ function triggerUpload(eventId) {
     document.getElementById('upload_file_input').click();
 }
 
-function openUploadModal(eventId) {
-    document.getElementById('modal_event_id').value = eventId;
-    document.getElementById('uploadModal').style.display = 'block';
-}
+document.getElementById('upload_file_input').addEventListener('change', function () {
+    const fileInput = this;
+    const formData = new FormData();
+    const eventId = document.getElementById('upload_event_id').value;
 
-function closeUploadModal() {
-    document.getElementById('uploadModal').style.display = 'none';
-}
+    if (fileInput.files.length === 0) {
+        return;
+    }
 
-//Simpan register ke database
-function simpanRegistrasi(eventId, result) {
-    fetch('/register-event', {
+    formData.append('event_id', eventId);
+    formData.append('bukti_pembayaran', fileInput.files[0]);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+    fetch('/upload-bukti', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-            event_id: eventId,
-            transaction_id: result.transaction_id,
-            status: result.transaction_status
-        })
+        body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    })
     .then(data => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Registrasi Berhasil!',
-            text: 'Data registrasi telah disimpan.'
-        });
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Upload berhasil!',
+                text: data.message,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = '/history';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: data.message
+            });
+        }
     })
     .catch(error => {
-        console.error('Gagal simpan registrasi:', error);
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: 'Terjadi kesalahan: ' + error.message
+        });
     });
+});
+
+
+    function openModal(src) {
+        document.getElementById("imageModal").style.display = "block";
+        document.getElementById("modalImage").src = src;
+    }
+
+    function closeImageModal() {
+        document.getElementById("imageModal").style.display = "none";
+    }
+    window.onclick = function(event) {
+    const modal = document.getElementById("imageModal");
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
 }
 
 
 
 
-function daftarEvent(e, eventId) {
+
+
+
+function daftarEvent(e, eventId, eventName) {
     e.preventDefault();
 
     // Simpan registrasi dulu
@@ -202,7 +235,7 @@ function daftarEvent(e, eventId) {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             credentials: 'same-origin',
-            body: JSON.stringify({ event_id: eventId })
+            body: JSON.stringify({ event_id: eventId,nama_event: eventName  })
         });
     })
     .then(response => response.json())
@@ -212,9 +245,18 @@ function daftarEvent(e, eventId) {
         // 3️⃣ Tampilkan Midtrans popup
         window.snap.pay(data.token, {
             onSuccess: function(result){
-                console.log("Pembayaran sukses:", result);
-                // Kalau mau update status pembayaran di sini
-            },
+            console.log("Pembayaran sukses:", result);
+            Swal.fire({
+                icon: 'success',
+                title: 'Pendaftaran Berhasil!',
+                html: `Terima kasih sudah melakukan pendaftaran untuk event <b>${eventName}</b>. Silakan upload bukti bayar untuk proses lebih lanjut.`,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Optional: refresh halaman atau redirect ke halaman history
+                location.reload();
+                document.getElementById('btnUpload' + eventId).disabled = false;
+            });
+        },
             onPending: function(result){
                 console.log("Menunggu pembayaran:", result);
                 // Bisa update status pending di sini kalau perlu
@@ -237,3 +279,22 @@ function daftarEvent(e, eventId) {
     });
 }
 
+
+function updateHistoryNotif() {
+    fetch('/history-notif-count')
+        .then(response => response.json())
+        .then(data => {
+            let badge = document.getElementById('historyNotif');
+            if(data.count > 0){
+                badge.style.display = 'inline-block';
+                badge.innerText = data.count;
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Notif Error:', error));
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    updateHistoryNotif();
+});
