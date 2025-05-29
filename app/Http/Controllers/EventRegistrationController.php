@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\EventRegistration;
 use Illuminate\Support\Carbon;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class EventRegistrationController extends Controller
 {
@@ -110,7 +111,7 @@ class EventRegistrationController extends Controller
 {
     $userId = auth()->user()->id_users;
 
-    $history = EventRegistration::with('event')
+    $history = EventRegistration::with(['event', 'user'])
         ->where('id_users', $userId)
         ->orderBy('created_at', 'desc')
         ->get();
@@ -118,6 +119,15 @@ class EventRegistrationController extends Controller
     return view('history', compact('history'));
 }
 
+public function generateQRCode($id)
+{
+    $registration = EventRegistration::with(['event', 'user'])->find($id);
 
+    $text = "Peserta: " . $registration->user->name . "\nEvent: " . $registration->event->name;
+
+    $qrCode = QrCode::size(300)->generate($text);
+
+    return view('qr_code_view', compact('qrCode'));
+}
 
 }
