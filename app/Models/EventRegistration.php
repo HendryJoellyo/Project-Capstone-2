@@ -10,8 +10,11 @@ class EventRegistration extends Model
     protected $primaryKey = 'id_event_registrations';
 
     protected $fillable = [
-    'id_users', 'id_events', 'status_pembayaran',
-    'bukti_pembayaran', 'transaction_id', 'created_at', 'updated_at'
+    'id_users',
+    'id_events',
+    'bukti_pembayaran',
+    'status_pembayaran',
+    'status_kehadiran'
 ];
 
     

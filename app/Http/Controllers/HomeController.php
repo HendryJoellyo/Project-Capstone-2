@@ -32,9 +32,9 @@ class HomeController extends Controller
             return Carbon::parse($event->tanggal)->format('Y-m-d');
         });
 
-        // Ambil data registrasi hanya kalau user login dan role-nya 13 (member)
+        // Ambil data registrasi hanya kalau user login dan role-nya 4 (member)
         $registrations = [];
-        if (Auth::check() && Auth::user()->id_roles == 13) {
+        if (Auth::check() && Auth::user()->id_roles == 4) {
             $registrations = EventRegistration::where('id_users', Auth::id())
                 ->pluck('status_pembayaran', 'id_events')
                 ->toArray();

@@ -2587,7 +2587,7 @@ ol {
 
 .badge-notif {
     background: red;
-    color: white;
+    color: rgb(255, 255, 255);
     border-radius: 50%;
     padding: 3px 7px;
     font-size: 12px;

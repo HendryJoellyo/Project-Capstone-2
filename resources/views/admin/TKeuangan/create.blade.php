@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Tambah Role</title>
+  <title>Tambah Tim Keuangan</title>
   <link rel="stylesheet" href="{{ asset('AdminLTE/plugins/fontawesome-free/css/all.min.css') }}">
   <link rel="stylesheet" href="{{ asset('AdminLTE/dist/css/adminlte.min.css') }}">
 </head>
@@ -14,7 +14,8 @@
 
   <div class="content-wrapper">
     <div class="content-header container-fluid">
-      <h1>Tambah Role</h1>
+      <h1>Tambah Data Tim Keuangan</h1>
+      <br>
 
       <form action="{{ route('admin.keuangans.store') }}" method="POST">
         @csrf
@@ -29,6 +30,14 @@
         <div class="form-group">
           <label>Email</label>
           <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" name="password" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary">Simpan</button>
         <a href="{{ route('admin.keuangans.dashboard') }}" class="btn btn-secondary">Kembali</a>

@@ -15,6 +15,7 @@
   <div class="content-wrapper">
     <div class="content-header container-fluid">
       <h1>Tambah Role</h1>
+      <br>
 
       <form action="{{ route('admin.roles.store') }}" method="POST">
         @csrf

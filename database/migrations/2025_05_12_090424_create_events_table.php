@@ -15,7 +15,7 @@ class CreateEventsTable extends Migration
             $table->time('waktu');
             $table->string('lokasi', 45);
             $table->string('narasumber', 45);
-            $table->string('poster', 255);
+            $table->string('poster', 45);
             $table->string('biaya_registrasi', 45);
             $table->integer('jumlah_peserta');
             $table->timestamps();

@@ -31,6 +31,10 @@
           <label>Email</label>
           <input type="email" name="email" class="form-control" value="{{ $keuangan->email }}" required>
         </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="text" name="password" class="form-control" required>
+        </div>
         <button type="submit" class="btn btn-primary">Update</button>
         <a href="{{ route('admin.keuangans.dashboard') }}" class="btn btn-secondary">Kembali</a>
       </form>

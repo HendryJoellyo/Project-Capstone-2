@@ -36,27 +36,33 @@
     <p>Tanggal: {{ \Carbon\Carbon::parse($item->event->tanggal)->format('d M Y') }}</p>
 
     <div class="d-flex justify-content-between align-items-center">
-      <div>
-        Status:
-        @if($item->status_pembayaran == 'pending')
-        <span class="text-warning">Pending</span>
-        @elseif($item->status_pembayaran == 'proses')
-        <span style="color:orange;">Sedang Diproses</span>
-        @elseif($item->status_pembayaran == 'verified')
-        <span class="text-success">Terverifikasi</span>
-        @elseif($item->status_pembayaran == 'rejected')
-        <span class="text-danger">Ditolak</span>
-        @endif
-        <p style="font-style: italic; font-size: small; color:rgb(184, 184, 184); font-weight: bold;">*Tunjukan QR-Code pada panitia saat menghadiri Event</p>
-      </div>
+  <div>
+    Status:
+    @if($item->status_pembayaran == 'pending')
+      <span class="text-warning">Pending</span>
+    @elseif($item->status_pembayaran == 'proses')
+      <span style="color:orange;">Sedang Diproses</span>
+    @elseif($item->status_pembayaran == 'verified')
+      <span class="text-success">Terverifikasi</span>
+    @elseif($item->status_pembayaran == 'rejected')
+      <span class="text-danger">Ditolak</span>
+    @endif
 
-      @if($item->status_pembayaran == 'verified')
-      <button class="btn btn-sm btn-primary"
-        onclick="showQrCode('{{ $item->user->nama }}', '{{ $item->event->nama_event }}')">
-        <i class="fa fa-qrcode"></i> Lihat QR
-      </button>
-      @endif
-    </div>
+    @if($item->status_pembayaran == 'verified')
+      <p style="font-style: italic; font-size: small; color:rgb(184, 184, 184); font-weight: bold; margin-bottom: 0;">
+        *Tunjukan QR-Code pada panitia saat menghadiri Event
+      </p>
+    @endif
+  </div>
+
+  @if($item->status_pembayaran == 'verified')
+    <button class="btn btn-sm btn-primary"
+      onclick="showQrCode('{{ $item->id_event_registrations }}')">
+      <i class="fa fa-qrcode"></i> Lihat QR
+    </button>
+  @endif
+</div>
+
   </div>
   @empty
   <p>Belum ada history event.</p>
@@ -80,21 +86,21 @@
     updateHistoryNotif();
   });
 
-  function showQrCode(userName, eventName) {
-    const qrData = `Peserta: ${userName}\nEvent: ${eventName}`;
-    let qrCanvas = document.createElement('canvas');
-    let qr = new QRious({
-      element: qrCanvas,
-      value: qrData,
-      size: 200
-    });
+  function showQrCode(registrationId) {
+  let qrCanvas = document.createElement('canvas');
+  let qr = new QRious({
+    element: qrCanvas,
+    value: registrationId,
+    size: 200
+  });
 
-    Swal.fire({
-      title: 'QR Code Peserta',
-      html: qrCanvas,
-      confirmButtonText: 'Tutup'
-    });
-  }
+  Swal.fire({
+    title: 'QR Code Peserta',
+    html: qrCanvas,
+    confirmButtonText: 'Tutup'
+  });
+}
+
 </script>
 
 </body>

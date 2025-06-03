@@ -29,4 +29,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(EventRegistration::class, 'id_users');
     }
+
+    public function getAuthIdentifier()
+{
+    return $this->getKey();
+}
+
 }

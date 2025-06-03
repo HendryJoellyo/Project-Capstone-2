@@ -27,6 +27,11 @@
                     <p>Data Event</p>
                   </a>
                 </li>
+                <li class="nav-item menu-open">
+                  <a href="{{ route('panitia.events.event_member') }}" class="nav-link {{ request()->routeIs('panitia.events.event_member') ? 'active' : '' }}">
+                    <p>Event Member</p>
+                  </a>
+                </li>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

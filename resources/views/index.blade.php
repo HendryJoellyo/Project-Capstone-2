@@ -50,7 +50,8 @@
                     </div>
                 </div>
                 <div class="col-lg-5">
-                    <img src="img/hero-right.png" alt="">
+                    <img src="{{ asset('img/hero-right.png') }}">
+
                 </div>
             </div>
         </div>
@@ -159,7 +160,7 @@
                                                                     </li>
                                                                     <li style="color: green; font-weight: bold;"><i class="fa fa-money" style="color: green;"></i> {{ $event->biaya_registrasi }} IDR</li>
                                                                @if ($event->slot_tersedia > 0)
-                                                                @if(Auth::check() && Auth::user()->id_roles == 13)
+                                                                @if(Auth::check() && Auth::user()->id_roles == 4)
                                                                     <li>
                                                                         <input type="hidden" name="event_id" value="{{ $event->id_events }}">
 

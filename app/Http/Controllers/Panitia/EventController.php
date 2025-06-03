@@ -41,6 +41,4 @@ class EventController extends Controller
 
         return redirect()->route('panitia.events.index')->with('success', 'Event berhasil ditambahkan!');
     }
-
-        
 }

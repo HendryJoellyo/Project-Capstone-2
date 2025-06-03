@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PanitiaController;
 use App\Http\Controllers\Keuangan\DashboardKeuanganController;
 use App\Http\Controllers\Panitia\DashboardPanitiaController;
 use App\Http\Controllers\Panitia\EventController;
+use App\Http\Controllers\Panitia\EventMemberController;
 use App\Http\Controllers\Pembayaran\PaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventRegistrationController;
@@ -62,11 +63,15 @@ Route::prefix('keuangan')->middleware(['auth', 'verified', KeuanganMiddleware::c
 // Login sebagai Panitia Event
 Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::class])->name('panitia.')->group(function () {
     Route::get('/dashboard', [DashboardPanitiaController::class, 'index'])->name('dashboard');
-
     // Route event
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    // Route event member
+    Route::get('/event-member', [EventMemberController::class, 'index'])->name('events.event_member');
+    Route::get('/event-member/scan', [EventMemberController::class, 'scan'])->name('events.scan_qr');
+    Route::post('/event-member/absen', [EventMemberController::class, 'absenMember'])->name('events.absen_qr');
+    Route::get('/event-member/{id}/list', [EventMemberController::class, 'listMember']);
 });
 
 // Public Frontend Routes — khusus Member + Guest (user biasa)
@@ -74,10 +79,12 @@ Route::middleware([CheckFrontendMember::class])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('index');
     Route::post('/get-snap-token', [PaymentController::class, 'processPayment'])->middleware('auth')->name('get-snap-token');
     Route::post('/upload-bukti', [EventRegistrationController::class, 'uploadBukti'])->name('upload.bukti')->middleware('auth');
+
     Route::post('/update-status/{id}', [EventRegistrationController::class, 'updateStatus'])->name('update.status');
     Route::post('/register-event', [EventRegistrationController::class, 'daftarEvent'])->middleware('auth');
     Route::get('/history-notif-count', [HistoryController::class, 'getNotifCount']);
     Route::get('/history', [EventRegistrationController::class, 'history'])->name('history')->middleware('auth');
+
 
 
     Route::get('/schedule', function () {
