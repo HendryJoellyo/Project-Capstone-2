@@ -26,7 +26,6 @@
                   <th>No</th>
                   <th>Nama Event</th>
                   <th>Nama Member</th>
-                  <th>Bukti Pembayaran</th>
                   <th>Status Pembayaran</th>
               </tr>
           </thead>
@@ -36,9 +35,6 @@
           <td>{{ $key+1 }}</td>
           <td>{{ $reg->event->nama_event }}</td>
           <td>{{ $reg->user->nama }}</td>
-          <td>
-            <a href="{{ asset('uploads/bukti_pembayaran/'.$reg->bukti_pembayaran) }}" target="_blank">Lihat Bukti</a>
-          </td>
           <td>
             @if($reg->status_pembayaran == 'pending' || $reg->status_pembayaran == 'proses')
               <button class="btn btn-success btn-sm" onclick="updateStatus({{ $reg->id_event_registrations }}, 'verified')">

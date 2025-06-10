@@ -55,22 +55,21 @@
 
     $('select[name="id_event"]').on('change', function(){
       currentEventId = $(this).val();
-      console.log("Event terpilih: " + currentEventId);  // <- tambahin ini
+      console.log("Event terpilih: " + currentEventId);
       localStorage.setItem('lastEventId', currentEventId);
       loadMember(currentEventId);
     });
   });
 
   function loadMember(eventId) {
-    console.log("Load member untuk eventId: " + eventId);  // tambahin ini
+    console.log("Load member untuk eventId: " + eventId);
     if(eventId){
       $.get('/panitia/event-member/' + eventId + '/list?ts=' + new Date().getTime(), function(data){
-        console.log(data); // dan ini
-        // 📊 Hitung jumlah yang hadir
+        console.log(data);
         const hadirData = data.filter(item => item.status_kehadiran === 'hadir');
         const totalHadir = hadirData.length;
 
-        // Tampilkan dashboard summary
+        // 📊 Summary dashboard
         let summaryHtml = `
           <div class="alert alert-info" role="alert">
             📊 Total Peserta Hadir: <strong>${totalHadir}</strong> Orang
@@ -78,22 +77,39 @@
         `;
         $('#summaryDashboard').html(summaryHtml);
 
-        // Tampilkan tabel peserta hadir
-        let html = '<table class="table table-bordered"><thead><tr><th>Nama</th></tr></thead><tbody>';
-
+        // 📋 Tabel peserta hadir
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+        let html = '<table class="table table-bordered"><thead><tr><th>Nama</th><th>Upload Sertifikat</th></tr></thead><tbody>';
+        
         if(hadirData.length > 0){
           hadirData.forEach(item => {
             html += `<tr>
-                        <td>${item.user ? item.user.nama : 'Unknown'}</td>
-                     </tr>`;
+                      <td>${item.user ? item.user.nama : 'Unknown'}</td>
+                      <td>`;
+
+            if(item.certificate) {
+              // Sertifikat sudah ada — tampilkan link download
+              const fileName = item.certificate.file_path.split('/').pop();
+              html += `<a href="/${item.certificate.file_path}" target="_blank">
+                         <i class="fas fa-file-download"></i> ${fileName}
+                       </a>`;
+            } else {
+              // Belum ada — tampilkan form upload
+              html += `<form action="/panitia/event-member/upload-sertifikat/${item.id_event_registrations}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="file" name="sertifikat" accept="application/pdf,image/*" required>
+                        <button type="submit" class="btn btn-sm btn-success mt-1">Upload</button>
+                      </form>`;
+            }
+
+            html += `</td></tr>`;
           });
         } else {
-          html += `<tr><td colspan="1">Belum ada peserta yang hadir.</td></tr>`;
+          html += `<tr><td colspan="2">Belum ada peserta yang hadir.</td></tr>`;
         }
 
         html += '</tbody></table>';
         $('#memberList').html(html);
-
       });
     } else {
       $('#memberList').empty();
@@ -101,6 +117,16 @@
     }
   }
 </script>
+
+@if(session('success'))
+<script>
+  Swal.fire({
+    icon: 'success',
+    title: 'Berhasil!',
+    text: '{{ session('success') }}'
+  });
+</script>
+@endif
 
 </body>
 </html>

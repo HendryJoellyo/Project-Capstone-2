@@ -56,11 +56,25 @@
   </div>
 
   @if($item->status_pembayaran == 'verified')
+  @php
+    $sertifikat = \App\Models\Certificate::where('event_registration_id', $item->id_event_registrations)->first();
+  @endphp
+
+  <div class="d-flex align-items-center" style="gap: 10px;">
+    @if($item->certificate)
+      <a href="{{ asset($item->certificate->file_path) }}" class="btn btn-sm btn-success" download>
+        <i class="fa fa-download"></i> Klaim Sertifikat
+      </a>
+    @endif
+
+
     <button class="btn btn-sm btn-primary"
       onclick="showQrCode('{{ $item->id_event_registrations }}')">
       <i class="fa fa-qrcode"></i> Lihat QR
     </button>
-  @endif
+  </div>
+@endif
+
 </div>
 
   </div>

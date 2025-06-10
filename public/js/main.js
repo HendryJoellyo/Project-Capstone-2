@@ -121,62 +121,6 @@
 
 })(jQuery);
 
-// Upload bukti bayar
-function triggerUpload(eventId) {
-    document.getElementById('upload_event_id').value = eventId;
-    document.getElementById('upload_file_input').click();
-}
-
-document.getElementById('upload_file_input').addEventListener('change', function () {
-    const fileInput = this;
-    const formData = new FormData();
-    const eventId = document.getElementById('upload_event_id').value;
-
-    if (fileInput.files.length === 0) {
-        return;
-    }
-
-    formData.append('event_id', eventId);
-    formData.append('bukti_pembayaran', fileInput.files[0]);
-    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-    fetch('/upload-bukti', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => { throw new Error(text) });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Upload berhasil!',
-                text: data.message,
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = '/history';
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: data.message
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops!',
-            text: 'Terjadi kesalahan: ' + error.message
-        });
-    });
-});
 
 
     function openModal(src) {
@@ -249,7 +193,7 @@ function daftarEvent(e, eventId, eventName) {
             Swal.fire({
                 icon: 'success',
                 title: 'Pendaftaran Berhasil!',
-                html: `Terima kasih sudah melakukan pendaftaran untuk event <b>${eventName}</b>. Silakan upload bukti bayar untuk proses lebih lanjut.`,
+                html: `Terima kasih sudah melakukan pendaftaran untuk event <b>${eventName}</b>.`,
                 confirmButtonText: 'OK'
             }).then(() => {
                 // Optional: refresh halaman atau redirect ke halaman history

@@ -173,13 +173,8 @@
                                                                         <button onclick="daftarEvent(event, {{ $event->id_events }}, '{{ addslashes($event->nama_event) }}')" class="daftar">Daftar</button>
 
                                                                         @elseif($status == 'pending')
-                                                                        {{-- Sudah daftar, belum upload --}}
-                                                                        <button 
-                                                                            id="btnUpload{{ $event->id_events }}" 
-                                                                            onclick="triggerUpload({{ $event->id_events }})" 
-                                                                            class="BuktiBayar">
-                                                                            Upload Bukti Bayar
-                                                                        </button>
+                                                                        <span style="font-weight:bold; color:orange;">Sedang memproses pendaftaran</span>
+
 
                                                                         @elseif($status == 'proses')
                                                                         {{-- Sudah upload, nunggu verifikasi --}}
@@ -219,7 +214,6 @@
         <form id="uploadForm" style="display:none;">
             @csrf
             <input type="hidden" id="upload_event_id" name="event_id">
-            <input type="file" id="upload_file_input" name="bukti_pembayaran" accept="image/*">
         </form>
 
 

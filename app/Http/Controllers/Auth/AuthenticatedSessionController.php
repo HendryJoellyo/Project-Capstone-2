@@ -29,6 +29,15 @@ class AuthenticatedSessionController extends Controller
 
     $user = auth()->user();
 
+    // Cek status user, kalau nonaktif langsung logout dan balikin pesan error
+    if (!$user->status) {
+        Auth::logout();
+        return back()->withErrors([
+            'email' => 'Akun Anda nonaktif. Silakan hubungi admin.',
+        ]);
+    }
+
+    // Arahkan sesuai role
     if ($user->role && $user->role->nama_role === 'Admin') {
         return redirect()->route('admin.roles.dashboard');
     } elseif ($user->role && $user->role->nama_role === 'Panitia_Keuangan') {
@@ -39,10 +48,9 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('index');
     }
 
-
-
     abort(403, 'Unauthorized.');
 }
+
 
 
     

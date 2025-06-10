@@ -121,4 +121,13 @@ class PanitiaController extends Controller
     return redirect()->route('admin.panitias.dashboard')->with('success', 'Data berhasil dihapus.');
 }
 
+ public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id); 
+        $user->status = !$user->status; 
+        $user->save(); 
+
+        return redirect()->route('admin.panitias.dashboard')->with('success', 'Status akun berhasil diperbarui.');
+    }
+
 }

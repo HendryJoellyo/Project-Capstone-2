@@ -38,48 +38,70 @@
     }
   });
 
+  let html5QrcodeScanner;
+
   function onScanSuccess(decodedText, decodedResult) {
-    $.ajax({
-      url: "{{ route('panitia.events.absen_qr') }}",
-      method: "POST",
-      data: { data: decodedText },
-      success: function(response){
-        if(response.status === 'success'){
-          Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: response.message,
-          }).then(() => {
-            // Balik ke halaman event member
-            window.location.href = '/panitia/event-member';
-          });
-        } else {
+    // Stop scanner begitu berhasil scan
+    html5QrcodeScanner.clear().then(_ => {
+      // Kirim data ke server
+      $.ajax({
+        url: "{{ route('panitia.events.absen_qr') }}",
+        method: "POST",
+        data: { data: decodedText },
+        success: function(response){
+          if(response.status === 'success'){
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: response.message,
+            }).then(() => {
+              // Balik ke halaman event member
+              window.location.href = '/panitia/event-member';
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal!',
+              text: response.message
+            }).then(() => {
+              // Restart scanner kalau gagal
+              restartScanner();
+            });
+          }
+        },
+        error: function(xhr){
+          console.log(xhr.responseText);
           Swal.fire({
             icon: 'error',
-            title: 'Gagal!',
-            text: response.message
+            title: 'Error!',
+            text: 'Gagal mengirim data.'
+          }).then(() => {
+            restartScanner();
           });
         }
-      },
-      error: function(xhr){
-        console.log(xhr.responseText);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Gagal mengirim data.'
-        });
-      }
+      });
+    }).catch(error => {
+      console.error('Clear scanner error: ', error);
     });
   }
 
   function onScanFailure(error) {
-    // optional: console.log(error);
+    // optional log: console.log(error);
   }
 
-  let html5QrcodeScanner = new Html5QrcodeScanner(
-    "reader", { fps: 10, qrbox: 250 });
-  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  function restartScanner() {
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  }
+
+  $(document).ready(function(){
+    html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+      fps: 10,
+      qrbox: 250
+    });
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  });
 </script>
+
 
 </body>
 </html>
