@@ -59,8 +59,6 @@ Route::prefix('admin')->middleware(['auth', 'verified', AdminMiddleware::class])
 Route::prefix('keuangan')->middleware(['auth', 'verified', KeuanganMiddleware::class])->name('keuangan.')->group(function () {
     Route::get('/dashboard', [DashboardKeuanganController::class, 'index'])->name('dashboard');
     Route::post('/update-status-pembayaran', [DashboardKeuanganController::class, 'updateStatusPembayaran'])->name('update.status.pembayaran');
-
-
 });
 
 // Login sebagai Panitia Event
@@ -83,19 +81,13 @@ Route::prefix('panitia')->middleware(['auth', 'verified', PanitiaMiddleware::cla
 Route::middleware([CheckFrontendMember::class])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('index');
     Route::post('/get-snap-token', [PaymentController::class, 'processPayment'])->middleware('auth')->name('get-snap-token');
-
     Route::post('/update-status/{id}', [EventRegistrationController::class, 'updateStatus'])->name('update.status');
     Route::post('/register-event', [EventRegistrationController::class, 'daftarEvent'])->middleware('auth');
     Route::get('/history-notif-count', [HistoryController::class, 'getNotifCount']);
     Route::get('/history', [EventRegistrationController::class, 'history'])->name('history')->middleware('auth');
-
-
-    Route::get('/schedule', function () {
-        return view('schedule');
-    })->name('schedule');
-
-    
-
+    Route::get('/contact', function () {
+        return view('contact');
+    })->name('contact');
     Route::get('/', function () {
         return redirect('/home');
     });

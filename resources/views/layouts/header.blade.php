@@ -9,7 +9,6 @@
             <nav class="mainmenu mobile-menu">
                <ul>
     <li class="{{ Route::currentRouteName() == 'index' ? 'active' : '' }}"><a href="{{ url('/home') }}">Home</a></li>
-    <li class="{{ Route::currentRouteName() == 'schedule' ? 'active' : '' }}"><a href="{{ route('schedule') }}">Schedule</a></li>
     <li class="{{ Route::currentRouteName() == 'history' ? 'active' : '' }}">
         <a href="{{ route('history') }}">
             History
@@ -18,7 +17,7 @@
             @endif
         </a>
     </li>
-    <li class="{{ Route::currentRouteName() == 'contact' ? 'active' : '' }}"><a href="{{ url('/contact') }}">Contacts</a></li>
+    <li class="{{ Route::currentRouteName() == 'contact' ? 'active' : '' }}"><a href="{{ url('/contact') }}">Contact</a></li>
     @guest
         <li><a href="{{ route('register') }}">Register</a></li>
     @endguest
