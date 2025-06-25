@@ -1,2 +1,2 @@
 <p>Install Midtrans</p>
-composer require midtrans/midtrans-php
+composer require midtrans/midtrans-php```
